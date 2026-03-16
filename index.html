@@ -18,12 +18,22 @@
     .field-input,.field-select,.field-textarea{width:100%;border:none;outline:none;background:transparent;color:#0f172a;font-size:15px;padding:0}
     .field-input::placeholder,.field-textarea::placeholder{color:#94a3b8}
     .field-textarea{resize:vertical;min-height:64px;line-height:1.45}
+.combo-wrap{position:relative}
+    .combo-input-row{display:flex;align-items:center;gap:8px}
+    .combo-input-row .field-input{flex:1}
+    .combo-toggle{border:none;background:transparent;cursor:pointer;font-size:14px;color:#334155;padding:2px 0}
+    .combo-menu{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #dbe2ea;border-radius:14px;box-shadow:0 10px 24px rgba(15,23,42,.12);padding:6px;z-index:30;display:none;max-height:220px;overflow:auto}
+    .combo-menu.show{display:block}
+    .combo-item{width:100%;text-align:left;border:none;background:#fff;padding:10px 12px;border-radius:10px;cursor:pointer;color:#0f172a}
+    .combo-item:hover{background:#f1f5f9}
     .hero-title{background:linear-gradient(90deg,#0f172a 0%,#0f766e 45%,#2563eb 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .tag-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e2e8f0;color:#334155;font-size:12px;font-weight:700}
     .action-btn{border:1px solid #d1d5db;background:#fff;border-radius:14px;padding:11px 16px;font-weight:700;cursor:pointer;transition:all .18s ease;box-shadow:0 4px 12px rgba(15,23,42,.04)}
     .action-btn:hover{background:#f8fafc;transform:translateY(-1px)}
     .action-btn-primary{background:linear-gradient(135deg,#0f766e 0%,#0f766e 40%,#0ea5a4 100%);border-color:#0f766e;color:#fff}
     .action-btn-primary:hover{background:linear-gradient(135deg,#115e59 0%,#0f766e 100%)}
+.start-btn{margin-top:8px;border:none;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#16a34a 0%,#22c55e 100%);color:#fff;box-shadow:0 6px 14px rgba(34,197,94,.25)}
+    .start-btn:hover{filter:brightness(.98)}
     .action-btn-danger{background:#fff5f5;border-color:#fecaca;color:#b91c1c}
     .action-btn-danger:hover{background:#fee2e2}
     .section-title{font-size:18px;font-weight:800;color:#0f172a}
@@ -60,9 +70,8 @@
 
     <div class="section-card p-5 md:p-6">
       <div class="mb-4"><div class="section-title">① 操作紀錄</div></div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="field-card"><label class="field-label" for="testDate">檢測日期</label><input id="testDate" class="field-input" type="date"></div>
-        <div class="field-card"><label class="field-label" for="testTime">檢測時間</label><input id="testTime" class="field-input" type="time" step="60"></div>
         <div class="field-card"><label class="field-label" for="inspector">檢測員</label><select id="inspector" class="field-select"><option value="張雅智">張雅智</option><option value="林奕德">林奕德</option><option value="林謙杰">林謙杰</option></select></div>
       </div>
     </div>
@@ -84,7 +93,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 items-start">
         <div class="field-card">
           <label class="field-label" for="productName">目前分頁商品名</label>
-          <input id="productName" class="field-input" type="text" placeholder="請輸入商品名">
+          <div class="combo-wrap"><div class="combo-input-row"><input id="productName" class="field-input" type="text" placeholder="可選擇也可自行輸入" autocomplete="off"><button type="button" class="combo-toggle" id="productNameToggle">▼</button></div><div class="combo-menu" id="productNameMenu"><button type="button" class="combo-item" data-value="鮪魚飯糰">鮪魚飯糰</button><button type="button" class="combo-item" data-value="熟成紅鮭飯糰">熟成紅鮭飯糰</button><button type="button" class="combo-item" data-value="雞肉飯糰">雞肉飯糰</button></div></div>
         </div>
         <div class="tab-strip" id="tabStrip"></div>
       </div>
@@ -94,8 +103,8 @@
       <div class="mb-4"><div class="section-title">④ 商品基本資料</div></div>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <div class="field-card"><label class="field-label" for="productionDate">生產日</label><input id="productionDate" class="field-input" type="date"></div>
-        <div class="field-card"><label class="field-label" for="formulaType">配別</label><input id="formulaType" class="field-input" type="text" placeholder="請輸入配別"></div>
-        <div class="field-card"><label class="field-label" for="factory">鮮食廠</label><input id="factory" class="field-input" type="text" placeholder="請輸入鮮食廠"></div>
+        <div class="field-card"><label class="field-label" for="formulaType">配別</label><select id="formulaType" class="field-select"><option value="一配">一配</option><option value="二配">二配</option></select></div>
+        <div class="field-card"><label class="field-label" for="factory">鮮食廠</label><div class="combo-wrap"><div class="combo-input-row"><input id="factory" class="field-input" type="text" placeholder="可選擇也可自行輸入" autocomplete="off"><button type="button" class="combo-toggle" id="factoryToggle">▼</button></div><div class="combo-menu" id="factoryMenu"><button type="button" class="combo-item" data-value="大溪">大溪</button><button type="button" class="combo-item" data-value="晉欣">晉欣</button></div></div></div>
         <div class="field-card"><label class="field-label" for="semiProduct">半成品名</label><input id="semiProduct" class="field-input" type="text" list="semiProductOptions" placeholder="可選擇也可自行輸入"><datalist id="semiProductOptions"><option value="11+16湖鹽飯"></option><option value="一見鍾情飯"></option></datalist></div>
       </div>
     </div>
@@ -116,7 +125,8 @@
         </div>
         <button class="action-btn" id="btnImportCsvInline">匯入CSV檔</button>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-4">
+        <div class="field-card"><label class="field-label" for="testTime">檢測時間</label><input id="testTime" class="field-input" type="time" step="60"><button type="button" class="start-btn" id="btnStartTest">開始檢測</button></div>
         <div class="field-card"><label class="field-label" for="weight">重量(g)</label><input id="weight" class="field-input" type="number" step="0.01" placeholder="請輸入重量"></div>
         <div class="field-card"><label class="field-label" for="thickness">厚度(mm)</label><input id="thickness" class="field-input" type="number" step="0.01" placeholder="請輸入厚度"></div>
       </div>
@@ -130,7 +140,7 @@
     </div>
 
     <div class="section-card p-5 md:p-6">
-      <div class="mb-4"><div class="section-title">⑦ 感官品評與其他參考資料</div></div>
+      <div class="mb-4 flex items-center justify-between gap-3"><div class="section-title">⑦ 感官品評與其他參考資料</div><button type="button" class="action-btn" id="btnImportLab">匯入實驗室數據</button></div>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <div class="field-card"><label class="field-label" for="okng">OK/NG</label><select id="okng" class="field-select"><option value=""></option><option value="OK">OK</option><option value="NG">NG</option></select></div>
         <div class="field-card"><label class="field-label" for="remark">說明</label><textarea id="remark" class="field-textarea" placeholder="請輸入補充說明"></textarea></div>
@@ -143,24 +153,31 @@
       <button class="action-btn action-btn-primary w-full py-4 text-lg" id="btnExportBottom">匯出 Excel</button>
     </div>
 
-  </div>
+    <input id="labDataInput" type="file" accept=".xlsx,.xls" style="display:none;">
+</div>
 
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     const hsinchuCounty = { latitude: 24.8387, longitude: 121.0177 };
 
-    const sharedFieldIds = ['testDate','testTime','inspector','temperature','humidity','productTemp'];
+    const sharedFieldIds = ['testDate','inspector','temperature','humidity','productTemp'];
     const productFieldIds = ['productName','productionDate','formulaType','factory','semiProduct'];
-    const testFieldIds = ['weight','thickness','tasteValue','appearance','hardness','stickiness','balance','okng','remark','moisture','brokenRice'];
+    const testFieldIds = ['testTime','weight','thickness','tasteValue','appearance','hardness','stickiness','balance','okng','remark','moisture','brokenRice'];
 
     const els = Object.fromEntries([...sharedFieldIds, ...productFieldIds, ...testFieldIds].map(id => [id, document.getElementById(id)]));
+    const productNameToggle = document.getElementById('productNameToggle');
+    const productNameMenu = document.getElementById('productNameMenu');
+    const factoryToggle = document.getElementById('factoryToggle');
+    const factoryMenu = document.getElementById('factoryMenu');
     const tabStrip = document.getElementById('tabStrip');
     const testTabStrip = document.getElementById('testTabStrip');
+    const labDataInput = document.getElementById('labDataInput');
+    const btnImportLab = document.getElementById('btnImportLab');
 
     let shared = {
       testDate: '',
-      testTime: '',
       inspector: '張雅智',
       temperature: '',
       humidity: '',
@@ -182,10 +199,20 @@
       const now = new Date();
       return `${pad(now.getHours())}:${pad(now.getMinutes())}`;
     }
+    function yesterdayDateStr() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    }
+    const defaultProductNames = ['鮪魚飯糰','熟成紅鮭飯糰','雞肉飯糰'];
+    function suggestedProductName(index = 0) {
+      return defaultProductNames[index] || `商品${index + 1}`;
+    }
     function createEmptyTest(name='1次檢測') {
       return {
         id: uid(),
         testTabName: name,
+        testTime: '',
         weight: '',
         thickness: '',
         tasteValue: '',
@@ -199,14 +226,16 @@
         brokenRice: ''
       };
     }
-    function createEmptyProduct(name='商品1') {
+    function createEmptyProduct(name='鮪魚飯糰') {
       return {
         id: uid(),
         productName: name,
-        productionDate: '',
-        formulaType: '',
-        factory: '',
+        productionDate: yesterdayDateStr(),
+        formulaType: '一配',
+        factory: '大溪',
         semiProduct: '',
+        labMoisture: '',
+        labBrokenRice: '',
         tests: [createEmptyTest('1次檢測')]
       };
     }
@@ -218,6 +247,28 @@
       if (!product) return null;
       return product.tests.find(t => t.id === activeTestId);
     }
+    function setupCombo(inputEl, toggleEl, menuEl, onPick) {
+      function openMenu() { menuEl.classList.add('show'); }
+      function closeMenu() { menuEl.classList.remove('show'); }
+      toggleEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuEl.classList.toggle('show');
+      });
+      inputEl.addEventListener('focus', () => openMenu());
+      menuEl.querySelectorAll('.combo-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          inputEl.value = btn.dataset.value || btn.textContent.trim();
+          closeMenu();
+          onPick(inputEl.value);
+        });
+      });
+      document.addEventListener('click', (e) => {
+        if (!menuEl.contains(e.target) && e.target !== toggleEl && e.target !== inputEl) {
+          closeMenu();
+        }
+      });
+    }
+
     function bindSharedInputs() {
       sharedFieldIds.forEach(id => {
         const el = els[id];
@@ -248,6 +299,20 @@
         });
       });
     }
+    function bindCombos() {
+      setupCombo(els.productName, productNameToggle, productNameMenu, (value) => {
+        const product = getActiveProduct();
+        if (!product) return;
+        product.productName = value;
+        renderProductTabs();
+      });
+      setupCombo(els.factory, factoryToggle, factoryMenu, (value) => {
+        const product = getActiveProduct();
+        if (!product) return;
+        product.factory = value;
+      });
+    }
+
     function loadSharedToForm() {
       sharedFieldIds.forEach(id => { els[id].value = shared[id] ?? ''; });
     }
@@ -392,7 +457,7 @@
       const copy = JSON.parse(JSON.stringify(product));
       copy.id = uid();
       copy.productName = (copy.productName || '商品') + '-複製';
-      copy.tests = copy.tests.map((t, i) => ({ ...t, id: uid(), testTabName: `${i+1}次檢測` }));
+      copy.tests = copy.tests.map((t, i) => ({ ...t, id: uid(), testTabName: `${i+1}次檢測`, moisture: copy.labMoisture || t.moisture || '', brokenRice: copy.labBrokenRice || t.brokenRice || '' }));
       products.push(copy);
       activeProductId = copy.id;
       activeTestId = copy.tests[0]?.id || null;
@@ -418,7 +483,7 @@
       renderTestTabs();
     }
     function addProductTab() {
-      const product = createEmptyProduct(`商品${products.length + 1}`);
+      const product = createEmptyProduct(suggestedProductName(products.length));
       products.push(product);
       activeProductId = product.id;
       activeTestId = product.tests[0].id;
@@ -432,6 +497,8 @@
       if (!product) return;
       const name = `${product.tests.length + 1}次檢測`;
       const test = createEmptyTest(name);
+      if (product.labMoisture !== undefined) test.moisture = product.labMoisture || '';
+      if (product.labBrokenRice !== undefined) test.brokenRice = product.labBrokenRice || '';
       product.tests.push(test);
       activeTestId = test.id;
       loadTestToForm(test);
@@ -458,6 +525,48 @@
       return `${cleaned || '商品'}-食味計檢測錄表`.slice(0, 31);
     }
     function v(x){ return (x || '').toString().trim(); }
+    function normalizeProductName(name) {
+      return v(name).replace(/\s+/g, '').trim();
+    }
+    function applyLabDataMap(labMap) {
+      products.forEach(product => {
+        const key = normalizeProductName(product.productName);
+        const found = labMap[key];
+        if (!found) return;
+        product.labMoisture = found.moisture ?? '';
+        product.labBrokenRice = found.brokenRice ?? '';
+        product.tests.forEach(test => {
+          test.moisture = product.labMoisture;
+          test.brokenRice = product.labBrokenRice;
+        });
+      });
+      const activeTest = getActiveTest();
+      if (activeTest) loadTestToForm(activeTest);
+    }
+    async function importLabWorkbook(file) {
+      const buf = await file.arrayBuffer();
+      const workbook = XLSX.read(buf, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+      const labMap = {};
+      rows.forEach(row => {
+        const productName = row['商品名稱'] || row['商品名'] || row['品名'] || '';
+        const moisture = row['水份率(%)'] ?? row['水分率(%)'] ?? row['水份率'] ?? row['水分率'] ?? '';
+        const brokenRice = row['碎飯率(%)'] ?? row['碎飯率'] ?? '';
+        const key = normalizeProductName(productName);
+        if (!key) return;
+        labMap[key] = {
+          moisture: moisture === '' ? '' : String(moisture),
+          brokenRice: brokenRice === '' ? '' : String(brokenRice)
+        };
+      });
+      applyLabDataMap(labMap);
+      const matchedCount = products.filter(product => {
+        const key = normalizeProductName(product.productName);
+        return !!labMap[key];
+      }).length;
+      alert(`實驗室數據匯入完成，共比對到 ${matchedCount} 個商品分頁。`);
+    }
     function applyBorder(cell,{top='thin',left='thin',bottom='thin',right='thin'}={}) {
       cell.border = {
         top:{style:top,color:{argb:'FF000000'}},
@@ -565,12 +674,12 @@
       product.tests.forEach((test, idx) => {
         const row = 5 + idx;
         const values = [
-          shared.testDate, shared.testTime, shared.inspector, shared.temperature, shared.humidity, shared.productTemp,
+          shared.testDate, test.testTime, shared.inspector, shared.temperature, shared.humidity, shared.productTemp,
           product.productionDate, product.formulaType, product.factory,
           test.weight, test.thickness,
           product.semiProduct,
           test.tasteValue, test.appearance, test.hardness, test.stickiness, test.balance,
-          test.okng, test.remark, test.moisture, test.brokenRice
+          test.okng, test.remark, (test.moisture !== '' ? test.moisture : (product.labMoisture || '')), (test.brokenRice !== '' ? test.brokenRice : (product.labBrokenRice || ''))
         ];
         values.forEach((text, i) => {
           const cell = ws.getCell(row, i + 2);
@@ -632,12 +741,33 @@
       handleCsvImport(file);
     });
     document.getElementById('btnExportBottom').addEventListener('click', exportExcel);
+    document.getElementById('btnStartTest').addEventListener('click', () => {
+      const test = getActiveTest();
+      if (!test) return;
+      const t = currentTimeStr();
+      test.testTime = t;
+      els.testTime.value = t;
+    });
+    btnImportLab.addEventListener('click', () => labDataInput.click());
+    labDataInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        await importLabWorkbook(file);
+      } catch (err) {
+        console.error(err);
+        alert('實驗室數據匯入失敗，請確認檔案格式。');
+      } finally {
+        e.target.value = '';
+      }
+    });
 
     bindSharedInputs();
     bindProductInputs();
     bindTestInputs();
+    bindCombos();
 
-    const first = createEmptyProduct('商品1');
+    const first = createEmptyProduct('鮪魚飯糰');
     products = [first];
     activeProductId = first.id;
     activeTestId = first.tests[0].id;
