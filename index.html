@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>全家-食味計檢測錄表</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;background:
+      radial-gradient(circle at top left,rgba(16,185,129,.10),transparent 22%),
+      radial-gradient(circle at top right,rgba(59,130,246,.08),transparent 20%),
+      linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%);color:#0f172a}
+    .glass-card{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.7);box-shadow:0 14px 40px rgba(15,23,42,.08);border-radius:24px}
+    .section-card{background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);border:1px solid #e5e7eb;border-radius:24px;box-shadow:0 10px 24px rgba(15,23,42,.05)}
+    .field-card{border:1px solid #dbe2ea;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);border-radius:18px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 14px rgba(15,23,42,.03);transition:all .18s ease;min-height:92px;display:flex;flex-direction:column;gap:8px}
+    .field-card:focus-within{border-color:#0f766e;box-shadow:0 0 0 4px rgba(15,118,110,.10),0 8px 20px rgba(15,23,42,.06);transform:translateY(-1px)}
+    .field-label{font-size:13px;font-weight:700;color:#334155;letter-spacing:.2px}
+    .field-input,.field-select,.field-textarea{width:100%;border:none;outline:none;background:transparent;color:#0f172a;font-size:15px;padding:0}
+    .field-input::placeholder,.field-textarea::placeholder{color:#94a3b8}
+    .field-textarea{resize:vertical;min-height:64px;line-height:1.45}
+    .hero-title{background:linear-gradient(90deg,#0f172a 0%,#0f766e 45%,#2563eb 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .tag-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e2e8f0;color:#334155;font-size:12px;font-weight:700}
+    .action-btn{border:1px solid #d1d5db;background:#fff;border-radius:14px;padding:11px 16px;font-weight:700;cursor:pointer;transition:all .18s ease;box-shadow:0 4px 12px rgba(15,23,42,.04)}
+    .action-btn:hover{background:#f8fafc;transform:translateY(-1px)}
+    .action-btn-primary{background:linear-gradient(135deg,#0f766e 0%,#0f766e 40%,#0ea5a4 100%);border-color:#0f766e;color:#fff}
+    .action-btn-primary:hover{background:linear-gradient(135deg,#115e59 0%,#0f766e 100%)}
+    .action-btn-danger{background:#fff5f5;border-color:#fecaca;color:#b91c1c}
+    .action-btn-danger:hover{background:#fee2e2}
+    .section-title{font-size:18px;font-weight:800;color:#0f172a}
+    .section-desc{font-size:13px;color:#64748b}
+    .tab-strip,.subtab-wrap{display:flex;gap:10px;overflow:auto;padding-bottom:2px}
+    .tab-item{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:16px;border:1px solid #dbe2ea;background:#fff;color:#334155;font-weight:700;cursor:pointer;box-shadow:0 4px 10px rgba(15,23,42,.04)}
+    .tab-item.active{background:linear-gradient(135deg,#0f766e 0%,#0ea5a4 100%);border-color:#0f766e;color:#fff;box-shadow:0 8px 18px rgba(15,118,110,.24)}
+    .tab-add,.subtab-add{flex:0 0 auto;padding:10px 14px;border-radius:16px;border:1px dashed #94a3b8;background:#f8fafc;font-weight:800;cursor:pointer}
+.tab-delete,.subtab-delete{flex:0 0 auto;padding:10px 14px;border-radius:16px;border:1px solid #fecaca;background:#fff5f5;color:#b91c1c;font-weight:800;cursor:pointer}
+.tab-delete:hover,.subtab-delete:hover{background:#fee2e2}
+    .tab-meta{font-size:12px;font-weight:600;opacity:.85}
+    .subtab-item{flex:0 0 auto;padding:8px 12px;border-radius:14px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-weight:700;cursor:pointer}
+    .subtab-item.active{background:#0f766e;color:#fff;border-color:#0f766e}
+  </style>
+</head>
+<body class="p-4 md:p-6">
+  <div class="max-w-7xl mx-auto space-y-5">
+    <div class="glass-card p-5 md:p-7">
+      <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
+        <div class="space-y-3">
+          <div>
+            <h1 class="text-3xl md:text-4xl font-black hero-title">食味計檢測錄表單</h1>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 xl:max-w-[520px] xl:justify-end">
+          <button class="action-btn" id="btnDuplicate">複製目前商品分頁</button>
+          <button class="action-btn" id="btnImportCsv">匯入CSV檔</button>
+          <button class="action-btn action-btn-danger" id="btnDelete">刪除目前商品分頁</button>
+          
+        </div>
+      </div>
+    </div>
+  <input id="csvFileInput" type="file" accept=".csv,text/csv" class="hidden">
+
+    <div class="section-card p-5 md:p-6">
+      <div class="mb-4"><div class="section-title">① 操作紀錄</div></div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="field-card"><label class="field-label" for="testDate">檢測日期</label><input id="testDate" class="field-input" type="date"></div>
+        <div class="field-card"><label class="field-label" for="testTime">檢測時間</label><input id="testTime" class="field-input" type="time" step="60"></div>
+        <div class="field-card"><label class="field-label" for="inspector">檢測員</label><select id="inspector" class="field-select"><option value="張雅智">張雅智</option><option value="林奕德">林奕德</option><option value="林謙杰">林謙杰</option></select></div>
+      </div>
+    </div>
+
+    <div class="section-card p-5 md:p-6">
+      <div class="mb-4"><div class="section-title">② 環境條件</div></div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="field-card"><label class="field-label" for="temperature">氣溫</label><input id="temperature" class="field-input" type="text" placeholder="例如 26.4°C"></div>
+        <div class="field-card"><label class="field-label" for="humidity">濕度</label><input id="humidity" class="field-input" type="text" placeholder="例如 78%"></div>
+        <div class="field-card"><label class="field-label" for="productTemp">品溫</label><input id="productTemp" class="field-input" type="text" placeholder="請輸入品溫"></div>
+      </div>
+    </div>
+
+    <div class="section-card p-4 md:p-5">
+      <div class="mb-3">
+        <div class="section-title">③ 商品分頁</div>
+        
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 items-start">
+        <div class="field-card">
+          <label class="field-label" for="productName">目前分頁商品名</label>
+          <input id="productName" class="field-input" type="text" placeholder="請輸入商品名">
+        </div>
+        <div class="tab-strip" id="tabStrip"></div>
+      </div>
+    </div>
+
+    <div class="section-card p-5 md:p-6">
+      <div class="mb-4"><div class="section-title">④ 商品基本資料</div></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div class="field-card"><label class="field-label" for="productionDate">生產日</label><input id="productionDate" class="field-input" type="date"></div>
+        <div class="field-card"><label class="field-label" for="formulaType">配別</label><input id="formulaType" class="field-input" type="text" placeholder="請輸入配別"></div>
+        <div class="field-card"><label class="field-label" for="factory">鮮食廠</label><input id="factory" class="field-input" type="text" placeholder="請輸入鮮食廠"></div>
+        <div class="field-card"><label class="field-label" for="semiProduct">半成品名</label><input id="semiProduct" class="field-input" type="text" list="semiProductOptions" placeholder="可選擇也可自行輸入"><datalist id="semiProductOptions"><option value="11+16湖鹽飯"></option><option value="一見鍾情飯"></option></datalist></div>
+      </div>
+    </div>
+
+    <div class="section-card p-4 md:p-5">
+      <div class="mb-3">
+        <div class="section-title">⑤ 檢測分頁</div>
+        
+      </div>
+      <div class="subtab-wrap" id="testTabStrip"></div>
+    </div>
+
+    <div class="section-card p-5 md:p-6">
+      <div class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <div class="section-title">⑥ 檢測結果</div>
+          
+        </div>
+        <button class="action-btn" id="btnImportCsvInline">匯入CSV檔</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+        <div class="field-card"><label class="field-label" for="weight">重量(g)</label><input id="weight" class="field-input" type="number" step="0.01" placeholder="請輸入重量"></div>
+        <div class="field-card"><label class="field-label" for="thickness">厚度(mm)</label><input id="thickness" class="field-input" type="number" step="0.01" placeholder="請輸入厚度"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+        <div class="field-card"><label class="field-label" for="tasteValue">食味值</label><input id="tasteValue" class="field-input" type="number" step="0.01" placeholder="請輸入食味值"></div>
+        <div class="field-card"><label class="field-label" for="appearance">外觀</label><input id="appearance" class="field-input" type="text" placeholder="請輸入外觀評價"></div>
+        <div class="field-card"><label class="field-label" for="hardness">硬度</label><input id="hardness" class="field-input" type="text" placeholder="請輸入硬度評價"></div>
+        <div class="field-card"><label class="field-label" for="stickiness">黏度</label><input id="stickiness" class="field-input" type="text" placeholder="請輸入黏度評價"></div>
+        <div class="field-card"><label class="field-label" for="balance">平衡度</label><input id="balance" class="field-input" type="text" placeholder="請輸入平衡度評價"></div>
+      </div>
+    </div>
+
+    <div class="section-card p-5 md:p-6">
+      <div class="mb-4"><div class="section-title">⑦ 感官品評與其他參考資料</div></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div class="field-card"><label class="field-label" for="okng">OK/NG</label><select id="okng" class="field-select"><option value=""></option><option value="OK">OK</option><option value="NG">NG</option></select></div>
+        <div class="field-card"><label class="field-label" for="remark">說明</label><textarea id="remark" class="field-textarea" placeholder="請輸入補充說明"></textarea></div>
+        <div class="field-card"><label class="field-label" for="moisture">水分率</label><input id="moisture" class="field-input" type="number" step="0.01" placeholder="請輸入水分率"></div>
+        <div class="field-card"><label class="field-label" for="brokenRice">碎飯率</label><input id="brokenRice" class="field-input" type="number" step="0.01" placeholder="請輸入碎飯率"></div>
+      </div>
+    </div>
+
+    <div class="pt-2">
+      <button class="action-btn action-btn-primary w-full py-4 text-lg" id="btnExportBottom">匯出 Excel</button>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script>
+    const hsinchuCounty = { latitude: 24.8387, longitude: 121.0177 };
+
+    const sharedFieldIds = ['testDate','testTime','inspector','temperature','humidity','productTemp'];
+    const productFieldIds = ['productName','productionDate','formulaType','factory','semiProduct'];
+    const testFieldIds = ['weight','thickness','tasteValue','appearance','hardness','stickiness','balance','okng','remark','moisture','brokenRice'];
+
+    const els = Object.fromEntries([...sharedFieldIds, ...productFieldIds, ...testFieldIds].map(id => [id, document.getElementById(id)]));
+    const tabStrip = document.getElementById('tabStrip');
+    const testTabStrip = document.getElementById('testTabStrip');
+
+    let shared = {
+      testDate: '',
+      testTime: '',
+      inspector: '張雅智',
+      temperature: '',
+      humidity: '',
+      productTemp: ''
+    };
+    let products = [];
+    let activeProductId = null;
+    let activeTestId = null;
+
+    function uid() {
+      return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function currentDateStr() {
+      const now = new Date();
+      return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+    }
+    function currentTimeStr() {
+      const now = new Date();
+      return `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+    function createEmptyTest(name='1次檢測') {
+      return {
+        id: uid(),
+        testTabName: name,
+        weight: '',
+        thickness: '',
+        tasteValue: '',
+        appearance: '',
+        hardness: '',
+        stickiness: '',
+        balance: '',
+        okng: '',
+        remark: '',
+        moisture: '',
+        brokenRice: ''
+      };
+    }
+    function createEmptyProduct(name='商品1') {
+      return {
+        id: uid(),
+        productName: name,
+        productionDate: '',
+        formulaType: '',
+        factory: '',
+        semiProduct: '',
+        tests: [createEmptyTest('1次檢測')]
+      };
+    }
+    function getActiveProduct() {
+      return products.find(p => p.id === activeProductId);
+    }
+    function getActiveTest() {
+      const product = getActiveProduct();
+      if (!product) return null;
+      return product.tests.find(t => t.id === activeTestId);
+    }
+    function bindSharedInputs() {
+      sharedFieldIds.forEach(id => {
+        const el = els[id];
+        const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+        el.addEventListener(evt, () => { shared[id] = el.value; });
+      });
+    }
+    function bindProductInputs() {
+      productFieldIds.forEach(id => {
+        const el = els[id];
+        const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+        el.addEventListener(evt, () => {
+          const product = getActiveProduct();
+          if (!product) return;
+          product[id] = el.value;
+          if (id === 'productName') renderProductTabs();
+        });
+      });
+    }
+    function bindTestInputs() {
+      testFieldIds.forEach(id => {
+        const el = els[id];
+        const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+        el.addEventListener(evt, () => {
+          const test = getActiveTest();
+          if (!test) return;
+          test[id] = el.value;
+        });
+      });
+    }
+    function loadSharedToForm() {
+      sharedFieldIds.forEach(id => { els[id].value = shared[id] ?? ''; });
+    }
+    function loadProductToForm(product) {
+      productFieldIds.forEach(id => { els[id].value = product[id] ?? ''; });
+    }
+    function loadTestToForm(test) {
+      testFieldIds.forEach(id => { els[id].value = test[id] ?? ''; });
+    }
+    function renderProductTabs() {
+      tabStrip.innerHTML = '';
+      products.forEach((product, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tab-item' + (product.id === activeProductId ? ' active' : '');
+        btn.innerHTML = `<span>${product.productName?.trim() || `商品${index+1}`}</span><span class="tab-meta">${safeSheetName(product.productName || `商品${index+1}`)}</span>`;
+        btn.addEventListener('click', () => {
+          activeProductId = product.id;
+          activeTestId = product.tests[0]?.id || null;
+          loadProductToForm(product);
+          loadTestToForm(getActiveTest() || createEmptyTest());
+          renderProductTabs();
+          renderTestTabs();
+        });
+        tabStrip.appendChild(btn);
+      });
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'tab-add';
+      addBtn.textContent = '+ 新增商品分頁';
+      addBtn.addEventListener('click', addProductTab);
+      tabStrip.appendChild(addBtn);
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'tab-delete';
+      delBtn.textContent = '刪除商品分頁';
+      delBtn.addEventListener('click', deleteActiveProduct);
+      tabStrip.appendChild(delBtn);
+    }
+    function renderTestTabs() {
+      testTabStrip.innerHTML = '';
+      const product = getActiveProduct();
+      if (!product) return;
+      product.tests.forEach((test, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'subtab-item' + (test.id === activeTestId ? ' active' : '');
+        btn.textContent = test.testTabName || `${index + 1}次檢測`;
+        btn.addEventListener('click', () => {
+          activeTestId = test.id;
+          loadTestToForm(test);
+          renderTestTabs();
+        });
+        testTabStrip.appendChild(btn);
+      });
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'subtab-add';
+      addBtn.textContent = '+ 新增檢測分頁';
+      addBtn.addEventListener('click', addTestTab);
+      testTabStrip.appendChild(addBtn);
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'subtab-delete';
+      delBtn.textContent = '刪除檢測分頁';
+      delBtn.addEventListener('click', deleteActiveTest);
+      testTabStrip.appendChild(delBtn);
+    }
+    function decodeCsvBuffer(arrayBuffer) {
+      const encodings = ['big5', 'shift_jis', 'utf-8'];
+      for (const enc of encodings) {
+        try {
+          const text = new TextDecoder(enc).decode(arrayBuffer);
+          if (text && text.includes('No')) return text;
+        } catch (e) {}
+      }
+      return new TextDecoder().decode(arrayBuffer);
+    }
+    function parseCsvText(text) {
+      return text
+        .replace(/^\uFEFF/, '')
+        .split(/\r?\n/)
+        .filter(line => line.trim() !== '')
+        .map(line => line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(cell => {
+          const v = cell.trim();
+          return v.startsWith('"') && v.endsWith('"') ? v.slice(1, -1) : v;
+        }));
+    }
+    function ensureTestTabsForNo(product, no) {
+      while (product.tests.length < no) {
+        const nextNo = product.tests.length + 1;
+        product.tests.push(createEmptyTest(`${nextNo}次檢測`));
+      }
+    }
+    function importCsvRowsToActiveProduct(rows) {
+      const product = getActiveProduct();
+      if (!product) return;
+      let imported = 0;
+      for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i];
+        if (!cols || cols.length < 11) continue;
+        const no = parseInt(String(cols[0]).replace(/[^0-9]/g, ''), 10);
+        if (!Number.isFinite(no) || no < 1) continue;
+        ensureTestTabsForNo(product, no);
+        const test = product.tests[no - 1];
+        test.testTabName = `${no}次檢測`;
+        test.appearance = cols[6] ?? '';
+        test.hardness = cols[7] ?? '';
+        test.stickiness = cols[8] ?? '';
+        test.balance = cols[9] ?? '';
+        test.tasteValue = cols[10] ?? '';
+        imported += 1;
+      }
+      if (product.tests.length) {
+        activeTestId = product.tests[0].id;
+        loadTestToForm(getActiveTest() || product.tests[0]);
+      }
+      renderTestTabs();
+      alert(`已匯入 ${imported} 筆食味計資料。`);
+    }
+    async function handleCsvImport(file) {
+      if (!file) return;
+      const arrayBuffer = await file.arrayBuffer();
+      const text = decodeCsvBuffer(arrayBuffer);
+      const rows = parseCsvText(text);
+      if (!rows.length) {
+        alert('CSV 內容為空白或無法辨識。');
+        return;
+      }
+      importCsvRowsToActiveProduct(rows);
+    }
+    function triggerCsvImport() {
+      const input = document.getElementById('csvFileInput');
+      input.value = '';
+      input.click();
+    }
+    function duplicateActiveProduct() {
+      const product = getActiveProduct();
+      if (!product) return;
+      const copy = JSON.parse(JSON.stringify(product));
+      copy.id = uid();
+      copy.productName = (copy.productName || '商品') + '-複製';
+      copy.tests = copy.tests.map((t, i) => ({ ...t, id: uid(), testTabName: `${i+1}次檢測` }));
+      products.push(copy);
+      activeProductId = copy.id;
+      activeTestId = copy.tests[0]?.id || null;
+      loadProductToForm(copy);
+      loadTestToForm(copy.tests[0] || createEmptyTest());
+      renderProductTabs();
+      renderTestTabs();
+    }
+    function deleteActiveProduct() {
+      if (products.length === 1) {
+        alert('至少要保留一個商品分頁。');
+        return;
+      }
+      const idx = products.findIndex(p => p.id === activeProductId);
+      if (idx === -1) return;
+      products.splice(idx, 1);
+      const next = products[Math.max(0, idx - 1)];
+      activeProductId = next.id;
+      activeTestId = next.tests[0]?.id || null;
+      loadProductToForm(next);
+      loadTestToForm(next.tests[0] || createEmptyTest());
+      renderProductTabs();
+      renderTestTabs();
+    }
+    function addProductTab() {
+      const product = createEmptyProduct(`商品${products.length + 1}`);
+      products.push(product);
+      activeProductId = product.id;
+      activeTestId = product.tests[0].id;
+      loadProductToForm(product);
+      loadTestToForm(product.tests[0]);
+      renderProductTabs();
+      renderTestTabs();
+    }
+    function addTestTab() {
+      const product = getActiveProduct();
+      if (!product) return;
+      const name = `${product.tests.length + 1}次檢測`;
+      const test = createEmptyTest(name);
+      product.tests.push(test);
+      activeTestId = test.id;
+      loadTestToForm(test);
+      renderTestTabs();
+    }
+    function deleteActiveTest() {
+      const product = getActiveProduct();
+      if (!product) return;
+      if (product.tests.length === 1) {
+        alert('至少要保留一個檢測分頁。');
+        return;
+      }
+      const idx = product.tests.findIndex(t => t.id === activeTestId);
+      if (idx === -1) return;
+      product.tests.splice(idx, 1);
+      const next = product.tests[Math.max(0, idx - 1)];
+      activeTestId = next.id;
+      loadTestToForm(next);
+      renderTestTabs();
+    }
+
+    function safeSheetName(name) {
+      const cleaned = (name || '商品').replace(/[\\/*?:\[\]]/g, ' ').trim();
+      return `${cleaned || '商品'}-食味計檢測錄表`.slice(0, 31);
+    }
+    function v(x){ return (x || '').toString().trim(); }
+    function applyBorder(cell,{top='thin',left='thin',bottom='thin',right='thin'}={}) {
+      cell.border = {
+        top:{style:top,color:{argb:'FF000000'}},
+        left:{style:left,color:{argb:'FF000000'}},
+        bottom:{style:bottom,color:{argb:'FF000000'}},
+        right:{style:right,color:{argb:'FF000000'}}
+      };
+    }
+    function setRangeBorder(ws,startRow,startCol,endRow,endCol,borderSpec){
+      for(let r=startRow;r<=endRow;r++){
+        for(let c=startCol;c<=endCol;c++){
+          applyBorder(ws.getCell(r,c),{
+            top:r===startRow?(borderSpec.top||'thin'):'thin',
+            bottom:r===endRow?(borderSpec.bottom||'thin'):'thin',
+            left:c===startCol?(borderSpec.left||'thin'):'thin',
+            right:c===endCol?(borderSpec.right||'thin'):'thin'
+          });
+        }
+      }
+    }
+    function buildSheet(workbook, product, index) {
+      const sheetName = safeSheetName(v(product.productName) || `商品${index + 1}`);
+      const ws = workbook.addWorksheet(sheetName, { views: [{ showGridLines: false }] });
+
+      ws.columns = [
+        { width: 3.5 },  // A
+        { width: 10.5 }, // B 檢測日期
+        { width: 10.5 }, // C 檢測時間
+        { width: 13.5 }, // D 檢測員
+        { width: 9.5 },  // E 氣溫
+        { width: 9.5 },  // F 濕度
+        { width: 9.5 },  // G 品溫
+        { width: 10.5 }, // H 生產日
+        { width: 9.5 },  // I 配別
+        { width: 11 },   // J 鮮食廠
+        { width: 9.5 },  // K 重量
+        { width: 9.5 },  // L 厚度
+        { width: 18 },   // M 半成品名
+        { width: 10.5 }, // N 食味值
+        { width: 9.5 },  // O 外觀
+        { width: 9.5 },  // P 硬度
+        { width: 9.5 },  // Q 黏度
+        { width: 9.5 },  // R 平衡度
+        { width: 9.5 },  // S OK/NG
+        { width: 27 },   // T 說明
+        { width: 10.5 }, // U 水分率
+        { width: 10.5 }  // V 碎飯率
+      ];
+
+      ws.getRow(1).height = 39;
+      ws.getRow(2).height = 17.4;
+      ws.getRow(3).height = 26.4;
+      ws.getRow(4).height = 19.2;
+
+      const grayFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFD9D9D9' } };
+      const centerAlign = { vertical:'middle', horizontal:'center', wrapText:true };
+      const headerFont = { name:'Microsoft JhengHei', size:12, bold:true };
+      const bodyFont = { name:'Microsoft JhengHei', size:11 };
+
+      ws.mergeCells('B1:V1');
+      ws.getCell('B1').value = `全家-${v(product.productName) || `商品${index + 1}`}-食味計檢測錄表`;
+      ws.getCell('B1').font = { name:'Microsoft JhengHei', size:18, bold:true };
+      ws.getCell('B1').alignment = { vertical:'middle', horizontal:'center' };
+
+      ws.mergeCells('B3:D3');
+      ws.mergeCells('E3:G3');
+      ws.mergeCells('H3:M3');
+      ws.mergeCells('N3:R3');
+      ws.mergeCells('S3:T3');
+      ws.mergeCells('U3:V3');
+
+      [
+        ['B3','①操作紀錄'],
+        ['E3','②環境條件'],
+        ['H3','③商品基本資料'],
+        ['N3','④檢測結果'],
+        ['S3','⑤感官品評'],
+        ['U3','⑥其他參考資料']
+      ].forEach(([addr, text]) => {
+        const cell = ws.getCell(addr);
+        cell.value = text;
+        cell.fill = grayFill;
+        cell.font = headerFont;
+        cell.alignment = centerAlign;
+      });
+
+      const headers = [
+        '檢測日期','檢測時間','檢測員','氣溫','濕度','品溫',
+        '生產日','配別','鮮食廠','重量(g)','厚度(mm)','半成品名',
+        '食味值','外觀','硬度','黏度','平衡度','OK/NG','說明','水分率','碎飯率'
+      ];
+      headers.forEach((text, i) => {
+        const cell = ws.getCell(4, i + 2);
+        cell.value = text;
+        cell.fill = grayFill;
+        cell.font = headerFont;
+        cell.alignment = centerAlign;
+      });
+
+      const dataRows = product.tests.length || 1;
+      for (let i = 0; i < dataRows; i++) {
+        ws.getRow(5 + i).height = 32;
+      }
+
+      product.tests.forEach((test, idx) => {
+        const row = 5 + idx;
+        const values = [
+          shared.testDate, shared.testTime, shared.inspector, shared.temperature, shared.humidity, shared.productTemp,
+          product.productionDate, product.formulaType, product.factory,
+          test.weight, test.thickness,
+          product.semiProduct,
+          test.tasteValue, test.appearance, test.hardness, test.stickiness, test.balance,
+          test.okng, test.remark, test.moisture, test.brokenRice
+        ];
+        values.forEach((text, i) => {
+          const cell = ws.getCell(row, i + 2);
+          cell.value = v(text);
+          cell.font = bodyFont;
+          cell.alignment = {
+            vertical:'middle',
+            horizontal: [13, 20].includes(i) ? 'left' : 'center',
+            wrapText:true
+          };
+        });
+      });
+
+      // 清空第2列
+      for (let c = 2; c <= 22; c++) ws.getCell(2, c).value = '';
+
+      // 基本框線
+      setRangeBorder(ws, 1, 2, 1, 22, { top:'medium', left:'medium', right:'medium', bottom:'thin' });
+      setRangeBorder(ws, 3, 2, 3, 22, { top:'medium', left:'medium', right:'medium', bottom:'thin' });
+      setRangeBorder(ws, 4, 2, 4 + dataRows, 22, { top:'thin', left:'medium', right:'medium', bottom:'medium' });
+
+      // 區塊雙線分隔
+      [4, 7, 13, 18, 20].forEach(col => {
+        for (let row = 3; row <= 4 + dataRows; row++) {
+          const cell = ws.getCell(row, col);
+          cell.border = {
+            top: { style: row === 3 ? 'medium' : 'thin', color: { argb:'FF000000' } },
+            bottom: { style: row === 4 + dataRows ? 'medium' : 'thin', color: { argb:'FF000000' } },
+            left: { style:'thin', color:{ argb:'FF000000' } },
+            right: { style:'double', color:{ argb:'FF000000' } }
+          };
+        }
+      });
+
+      // A欄僅保留外框感，不寫入檢測次數
+      for (let row = 1; row <= 4 + dataRows; row++) {
+        const cell = ws.getCell(row, 1);
+        cell.border = {
+          top: { style: row === 1 ? 'medium' : 'thin', color: { argb:'FF000000' } },
+          bottom: { style: row === 4 + dataRows ? 'medium' : 'thin', color: { argb:'FF000000' } },
+          left: { style: row === 1 ? 'medium' : 'thin', color: { argb:'FF000000' } },
+          right: { style:'thin', color: { argb:'FF000000' } }
+        };
+      }
+    }
+
+    async function exportExcel() {
+      const workbook = new ExcelJS.Workbook();
+      products.forEach((product, index) => buildSheet(workbook, product, index));
+      const fileName = `全家-食味計檢測錄表_多商品多次檢測.xlsx`;
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), fileName);
+    }
+
+    document.getElementById('btnImportCsv').addEventListener('click', triggerCsvImport);
+    document.getElementById('btnImportCsvInline').addEventListener('click', triggerCsvImport);
+    document.getElementById('csvFileInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      handleCsvImport(file);
+    });
+    document.getElementById('btnExportBottom').addEventListener('click', exportExcel);
+
+    bindSharedInputs();
+    bindProductInputs();
+    bindTestInputs();
+
+    const first = createEmptyProduct('商品1');
+    products = [first];
+    activeProductId = first.id;
+    activeTestId = first.tests[0].id;
+    shared.testDate = currentDateStr();
+    shared.testTime = currentTimeStr();
+    loadSharedToForm();
+    loadProductToForm(first);
+    loadTestToForm(first.tests[0]);
+    renderProductTabs();
+    renderTestTabs();
+
+    (async () => {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${hsinchuCounty.latitude}&longitude=${hsinchuCounty.longitude}&current=temperature_2m,relative_humidity_2m&timezone=Asia%2FTaipei`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('weather fetch failed');
+        const data = await res.json();
+        if (data.current?.temperature_2m !== undefined) shared.temperature = `${data.current.temperature_2m}°C`;
+        if (data.current?.relative_humidity_2m !== undefined) shared.humidity = `${data.current.relative_humidity_2m}%`;
+        loadSharedToForm();
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>
