@@ -72,7 +72,7 @@
       <div class="mb-4"><div class="section-title">① 操作紀錄</div></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="field-card"><label class="field-label" for="testDate">檢測日期</label><input id="testDate" class="field-input" type="date"></div>
-        <div class="field-card"><label class="field-label" for="inspector">檢測員</label><select id="inspector" class="field-select"><option value="張雅智">張雅智</option><option value="林奕德">林奕德</option><option value="林謙杰">林謙杰</option></select></div>
+        <div class="field-card"><label class="field-label" for="inspector">檢測員</label><select id="inspector" class="field-select"><option value="莊子儀">莊子儀</option><option value="林奕德">林奕德</option><option value="林謙杰">林謙杰</option></select></div>
       </div>
     </div>
 
@@ -101,11 +101,12 @@
 
     <div class="section-card p-5 md:p-6">
       <div class="mb-4"><div class="section-title">④ 商品基本資料</div></div>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         <div class="field-card"><label class="field-label" for="productionDate">生產日</label><input id="productionDate" class="field-input" type="date"></div>
         <div class="field-card"><label class="field-label" for="formulaType">配別</label><select id="formulaType" class="field-select"><option value="一配">一配</option><option value="二配">二配</option></select></div>
         <div class="field-card"><label class="field-label" for="factory">鮮食廠</label><div class="combo-wrap"><div class="combo-input-row"><input id="factory" class="field-input" type="text" placeholder="可選擇也可自行輸入" autocomplete="off"><button type="button" class="combo-toggle" id="factoryToggle">▼</button></div><div class="combo-menu" id="factoryMenu"><button type="button" class="combo-item" data-value="大溪">大溪</button><button type="button" class="combo-item" data-value="晉欣">晉欣</button></div></div></div>
         <div class="field-card"><label class="field-label" for="semiProduct">半成品名</label><input id="semiProduct" class="field-input" type="text" list="semiProductOptions" placeholder="可選擇也可自行輸入"><datalist id="semiProductOptions"><option value="11+16湖鹽飯"></option><option value="一見鍾情飯"></option></datalist></div>
+        <div class="field-card"><label class="field-label" for="riceMill">米廠</label><select id="riceMill" class="field-select"><option value="好的米">好的米</option><option value="斗南">斗南</option><option value="東遠">東遠</option></select></div>
       </div>
     </div>
 
@@ -141,11 +142,12 @@
 
     <div class="section-card p-5 md:p-6">
       <div class="mb-4 flex items-center justify-between gap-3"><div class="section-title">⑦ 感官品評與其他參考資料</div><button type="button" class="action-btn" id="btnImportLab">匯入實驗室數據</button></div>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         <div class="field-card"><label class="field-label" for="okng">OK/NG</label><select id="okng" class="field-select"><option value=""></option><option value="OK">OK</option><option value="NG">NG</option></select></div>
         <div class="field-card"><label class="field-label" for="remark">說明</label><textarea id="remark" class="field-textarea" placeholder="請輸入補充說明"></textarea></div>
         <div class="field-card"><label class="field-label" for="moisture">水分率</label><input id="moisture" class="field-input" type="number" step="0.01" placeholder="請輸入水分率"></div>
         <div class="field-card"><label class="field-label" for="brokenRice">碎飯率</label><input id="brokenRice" class="field-input" type="number" step="0.01" placeholder="請輸入碎飯率"></div>
+        <div class="field-card"><label class="field-label" for="notes">備註</label><textarea id="notes" class="field-textarea" placeholder="請輸入備註"></textarea></div>
       </div>
     </div>
 
@@ -163,8 +165,8 @@
     const hsinchuCounty = { latitude: 24.8387, longitude: 121.0177 };
 
     const sharedFieldIds = ['testDate','inspector','temperature','humidity','productTemp'];
-    const productFieldIds = ['productName','productionDate','formulaType','factory','semiProduct'];
-    const testFieldIds = ['testTime','weight','thickness','tasteValue','appearance','hardness','stickiness','balance','okng','remark','moisture','brokenRice'];
+    const productFieldIds = ['productName','productionDate','formulaType','factory','semiProduct','riceMill'];
+    const testFieldIds = ['testTime','weight','thickness','tasteValue','appearance','hardness','stickiness','balance','okng','remark','moisture','brokenRice','notes'];
 
     const els = Object.fromEntries([...sharedFieldIds, ...productFieldIds, ...testFieldIds].map(id => [id, document.getElementById(id)]));
     const productNameToggle = document.getElementById('productNameToggle');
@@ -178,7 +180,7 @@
 
     let shared = {
       testDate: '',
-      inspector: '張雅智',
+      inspector: '莊子儀',
       temperature: '',
       humidity: '',
       productTemp: ''
@@ -223,8 +225,22 @@
         okng: '',
         remark: '',
         moisture: '',
-        brokenRice: ''
+        brokenRice: '',
+        notes: ''
       };
+    }
+    function defaultRiceMillForProduct(productName) {
+      const normalized = (productName || '').replace(/\s+/g, '');
+      if (normalized.includes('鮪魚飯糰')) return '好的米';
+      if (normalized.includes('熟成紅鮭')) return '斗南';
+      return '';
+    }
+    function applyDefaultRiceMill(product) {
+      if (!product) return;
+      const riceMill = defaultRiceMillForProduct(product.productName);
+      if (!riceMill) return;
+      product.riceMill = riceMill;
+      if (product.id === activeProductId && els.riceMill) els.riceMill.value = riceMill;
     }
     function createEmptyProduct(name='鮪魚飯糰') {
       return {
@@ -234,6 +250,7 @@
         formulaType: '一配',
         factory: '大溪',
         semiProduct: '',
+        riceMill: defaultRiceMillForProduct(name),
         labMoisture: '',
         labBrokenRice: '',
         tests: [createEmptyTest('1次檢測')]
@@ -284,7 +301,10 @@
           const product = getActiveProduct();
           if (!product) return;
           product[id] = el.value;
-          if (id === 'productName') renderProductTabs();
+          if (id === 'productName') {
+            applyDefaultRiceMill(product);
+            renderProductTabs();
+          }
         });
       });
     }
@@ -304,6 +324,7 @@
         const product = getActiveProduct();
         if (!product) return;
         product.productName = value;
+        applyDefaultRiceMill(product);
         renderProductTabs();
       });
       setupCombo(els.factory, factoryToggle, factoryMenu, (value) => {
@@ -591,60 +612,63 @@
       const sheetName = safeSheetName(v(product.productName) || `商品${index + 1}`);
       const ws = workbook.addWorksheet(sheetName, { views: [{ showGridLines: false }] });
 
+      // 欄寬依附件第一分頁配置：A欄留白，B:X為正式資料區。
       ws.columns = [
-        { width: 3.5 },  // A
-        { width: 10.5 }, // B 檢測日期
+        { width: 3.5 },  // A 留白
+        { width: 13 },   // B 檢測日期
         { width: 10.5 }, // C 檢測時間
         { width: 13.5 }, // D 檢測員
         { width: 9.5 },  // E 氣溫
         { width: 9.5 },  // F 濕度
         { width: 9.5 },  // G 品溫
-        { width: 10.5 }, // H 生產日
+        { width: 13 },   // H 生產日
         { width: 9.5 },  // I 配別
         { width: 11 },   // J 鮮食廠
         { width: 9.5 },  // K 重量
-        { width: 9.5 },  // L 厚度
+        { width: 13 },   // L 厚度
         { width: 18 },   // M 半成品名
-        { width: 10.5 }, // N 食味值
-        { width: 9.5 },  // O 外觀
-        { width: 9.5 },  // P 硬度
-        { width: 9.5 },  // Q 黏度
-        { width: 9.5 },  // R 平衡度
-        { width: 9.5 },  // S OK/NG
-        { width: 27 },   // T 說明
-        { width: 10.5 }, // U 水分率
-        { width: 10.5 }  // V 碎飯率
+        { width: 18 },   // N 米廠
+        { width: 18 },   // O 食味值
+        { width: 18 },   // P 外觀
+        { width: 18 },   // Q 硬度
+        { width: 18 },   // R 黏度
+        { width: 10.5 }, // S 平衡度
+        { width: 9.5 },  // T OK/NG
+        { width: 9.5 },  // U 說明
+        { width: 9.5 },  // V 水分率
+        { width: 9.5 },  // W 碎飯率
+        { width: 20 }    // X 備註
       ];
 
       ws.getRow(1).height = 39;
-      ws.getRow(2).height = 17.4;
-      ws.getRow(3).height = 26.4;
-      ws.getRow(4).height = 19.2;
+      ws.getRow(2).height = 17.45;
+      ws.getRow(3).height = 26.45;
+      ws.getRow(4).height = 19.15;
 
       const grayFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFD9D9D9' } };
       const centerAlign = { vertical:'middle', horizontal:'center', wrapText:true };
       const headerFont = { name:'Microsoft JhengHei', size:12, bold:true };
       const bodyFont = { name:'Microsoft JhengHei', size:11 };
 
-      ws.mergeCells('B1:V1');
+      ws.mergeCells('B1:X1');
       ws.getCell('B1').value = `全家-${v(product.productName) || `商品${index + 1}`}-食味計檢測錄表`;
       ws.getCell('B1').font = { name:'Microsoft JhengHei', size:18, bold:true };
       ws.getCell('B1').alignment = { vertical:'middle', horizontal:'center' };
 
       ws.mergeCells('B3:D3');
       ws.mergeCells('E3:G3');
-      ws.mergeCells('H3:M3');
-      ws.mergeCells('N3:R3');
-      ws.mergeCells('S3:T3');
-      ws.mergeCells('U3:V3');
+      ws.mergeCells('H3:N3');
+      ws.mergeCells('O3:S3');
+      ws.mergeCells('T3:U3');
+      ws.mergeCells('V3:X3');
 
       [
         ['B3','①操作紀錄'],
         ['E3','②環境條件'],
         ['H3','③商品基本資料'],
-        ['N3','④檢測結果'],
-        ['S3','⑤感官品評'],
-        ['U3','⑥其他參考資料']
+        ['O3','④檢測結果'],
+        ['T3','⑤感官品評'],
+        ['V3','⑥其他參考資料']
       ].forEach(([addr, text]) => {
         const cell = ws.getCell(addr);
         cell.value = text;
@@ -655,8 +679,8 @@
 
       const headers = [
         '檢測日期','檢測時間','檢測員','氣溫','濕度','品溫',
-        '生產日','配別','鮮食廠','重量(g)','厚度(mm)','半成品名',
-        '食味值','外觀','硬度','黏度','平衡度','OK/NG','說明','水分率','碎飯率'
+        '生產日','配別','鮮食廠','重量(g)','厚度(mm)','半成品名','米廠',
+        '食味值','外觀','硬度','黏度','平衡度','OK/NG','說明','水分率','碎飯率','備註'
       ];
       headers.forEach((text, i) => {
         const cell = ws.getCell(4, i + 2);
@@ -668,7 +692,7 @@
 
       const dataRows = product.tests.length || 1;
       for (let i = 0; i < dataRows; i++) {
-        ws.getRow(5 + i).height = 32;
+        ws.getRow(5 + i).height = 31.9;
       }
 
       product.tests.forEach((test, idx) => {
@@ -676,10 +700,12 @@
         const values = [
           shared.testDate, test.testTime, shared.inspector, shared.temperature, shared.humidity, shared.productTemp,
           product.productionDate, product.formulaType, product.factory,
-          test.weight, test.thickness,
-          product.semiProduct,
+          test.weight, test.thickness, product.semiProduct, product.riceMill,
           test.tasteValue, test.appearance, test.hardness, test.stickiness, test.balance,
-          test.okng, test.remark, (test.moisture !== '' ? test.moisture : (product.labMoisture || '')), (test.brokenRice !== '' ? test.brokenRice : (product.labBrokenRice || ''))
+          test.okng, test.remark,
+          (test.moisture !== '' ? test.moisture : (product.labMoisture || '')),
+          (test.brokenRice !== '' ? test.brokenRice : (product.labBrokenRice || '')),
+          test.notes
         ];
         values.forEach((text, i) => {
           const cell = ws.getCell(row, i + 2);
@@ -687,22 +713,22 @@
           cell.font = bodyFont;
           cell.alignment = {
             vertical:'middle',
-            horizontal: [13, 20].includes(i) ? 'left' : 'center',
+            horizontal: [19, 22].includes(i) ? 'left' : 'center',
             wrapText:true
           };
         });
       });
 
-      // 清空第2列
-      for (let c = 2; c <= 22; c++) ws.getCell(2, c).value = '';
+      // 第2列依附件保留空白。
+      for (let c = 2; c <= 24; c++) ws.getCell(2, c).value = '';
 
-      // 基本框線
-      setRangeBorder(ws, 1, 2, 1, 22, { top:'medium', left:'medium', right:'medium', bottom:'thin' });
-      setRangeBorder(ws, 3, 2, 3, 22, { top:'medium', left:'medium', right:'medium', bottom:'thin' });
-      setRangeBorder(ws, 4, 2, 4 + dataRows, 22, { top:'thin', left:'medium', right:'medium', bottom:'medium' });
+      // 外框與資料區框線。
+      setRangeBorder(ws, 1, 2, 1, 24, { top:'medium', left:'medium', right:'medium', bottom:'thin' });
+      setRangeBorder(ws, 3, 2, 3, 24, { top:'medium', left:'medium', right:'medium', bottom:'thin' });
+      setRangeBorder(ws, 4, 2, 4 + dataRows, 24, { top:'thin', left:'medium', right:'medium', bottom:'medium' });
 
-      // 區塊雙線分隔
-      [4, 7, 13, 18, 20].forEach(col => {
+      // 各大區塊以雙線分隔：操作、環境、商品基本資料、檢測結果、感官品評。
+      [4, 7, 14, 19, 21].forEach(col => {
         for (let row = 3; row <= 4 + dataRows; row++) {
           const cell = ws.getCell(row, col);
           cell.border = {
@@ -714,7 +740,7 @@
         }
       });
 
-      // A欄僅保留外框感，不寫入檢測次數
+      // A欄保留附件中的空白外框欄。
       for (let row = 1; row <= 4 + dataRows; row++) {
         const cell = ws.getCell(row, 1);
         cell.border = {
